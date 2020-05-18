@@ -1,5 +1,5 @@
 import faker from 'faker'
-import { IColumn } from '../components/Table/Table'
+import { IColumn } from '../components/Table/types'
 
 const dataGenerator = (columnsCount: number, rowsCount: number): { data: string[][], columns: IColumn[] } => {
   const data: string[][] = []

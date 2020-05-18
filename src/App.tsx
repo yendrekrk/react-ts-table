@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import dataGenerator from './utils/dataGenerator'
-import Table from './components/Table/Table'
+import Table from './components/Table'
 
 import './App.css';
 
@@ -27,4 +27,4 @@ const App: React.FC = () => {
   );
 }
 
-export default App;
+export default App
