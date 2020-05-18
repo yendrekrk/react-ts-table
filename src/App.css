@@ -1,7 +1,29 @@
 .App {
   display: flex;
+  position: relative;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
+  padding: 100px 100px;
+}
+
+.App__controls {
+  position: absolute;
+  display: flex;
+  top: 20px;
+}
+
+.App__controls label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px;
+}
+
+@media only screen and (max-width: 600px) {
+  .App {
+    padding: 16px;
+  }
 }
