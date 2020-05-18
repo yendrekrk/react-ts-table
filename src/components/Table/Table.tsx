@@ -1,9 +1,20 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react'
-import styled from 'styled-components'
+import React, { useMemo, useState, useEffect } from 'react'
+import styled, { keyframes, css } from 'styled-components'
 
 import TableRow from './TableRow'
 import { ColumnHeader, TableCell } from './TableCells'
 import { IColumn } from './types'
+
+const appear = keyframes`
+  from {
+    transform: scaleY(0);
+    opacity: 0.2;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+`
 
 const TableWrapper = styled.table`
   position: relative; 
@@ -14,6 +25,13 @@ const TableWrapper = styled.table`
   border: 1px solid rgba(0, 0, 0, 0.2);
 `
 
+const AnimatedTableBody = styled.tbody<{ animate: boolean, animationSpeed: number }>`
+  transform-origin: top;
+  ${({ animate, animationSpeed }) => animate && css`
+    animation: ${appear} ${animationSpeed}ms 1;
+  `}
+`
+
 interface IProps {
   columns: IColumn[]
   data: string[][]
@@ -21,23 +39,24 @@ interface IProps {
 
 const Table: React.FC<IProps> = ({ columns, data }) => {
   const [sortColumnIndex, setSortColumnIndex] = useState(0)
-  const [sortedData, setSortedData] = useState<string[][] | null>([])
+  const [sortedData, setSortedData] = useState<string[][]>([])
+  const [animate, setAnimate] = useState(false)
+
   const isDataValid = useMemo(() => data.every(row => row.length === columns.length), [data, columns])
   const columnsCount = columns.length
 
-  const sortData = useCallback((data: string[][]) => new Promise<string[][]>(resolve => {
-    const sorted = data.sort((a, b) => a[sortColumnIndex].localeCompare(b[sortColumnIndex]))
-    resolve(sorted)
-  }), [sortColumnIndex])
+  const sortDataBy = (i: number) => {
+    if (animate) return
+    setSortColumnIndex(i)
+    const newlySortedData = data.sort((a, b) => a[i].localeCompare(b[i]))
+    setSortedData(newlySortedData)
+    setAnimate(true)
+  }
 
   useEffect(() => {
-    (async () => {
-      setSortedData(null)
-      const newData = await sortData(data)
-      setSortedData(newData)
-    })()
+    setSortedData(data.sort((a, b) => a[sortColumnIndex].localeCompare(b[sortColumnIndex])))
     // eslint-disable-next-line
-  }, [data, sortData])
+  }, [data])
 
   if (!isDataValid) {
     console.error('<Table/>: Rows length has to be equal to columns number!')
@@ -51,7 +70,7 @@ const Table: React.FC<IProps> = ({ columns, data }) => {
           {columns.map((column, i) => (
             <ColumnHeader
               key={`${column.name}${i}`}
-              onClick={() => setSortColumnIndex(i)}
+              onClick={() => sortDataBy(i)}
               cellWidth={column.width}
               isLast={i === columnsCount - 1}
               isSorting={i === sortColumnIndex}
@@ -61,7 +80,11 @@ const Table: React.FC<IProps> = ({ columns, data }) => {
           ))}
         </TableRow>
       </thead>
-      <tbody>
+      <AnimatedTableBody
+        animate={animate}
+        animationSpeed={sortedData.length * 50 > 1000 ? 1000 : sortedData.length * 50}
+        onAnimationEnd={() => setAnimate(false)}
+      >
         {sortedData && sortedData.map((row, i) => (
           <TableRow key={`row${i}`} index={i}>
             {row.map((cell, j) => (
@@ -71,7 +94,7 @@ const Table: React.FC<IProps> = ({ columns, data }) => {
             ))}
           </TableRow>
         ))}
-      </tbody>
+      </AnimatedTableBody>
     </TableWrapper>
   )
 }

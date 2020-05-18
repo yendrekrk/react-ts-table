@@ -27,8 +27,6 @@ export const ColumnHeader = styled.th<{ cellWidth: number, isLast: boolean, isSo
   cursor: pointer;
   background-color: lightsteelblue;
   font-size: 18px;
-  position: sticky;
-  top: 0;
   ${props => props.isSorting && css`
     text-decoration: underline;
   `}
